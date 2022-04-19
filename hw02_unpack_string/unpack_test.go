@@ -1,4 +1,4 @@
-package hw02_unpack_string
+package unpackstring
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package hw02_unpack_string
+package unpackstring
 
 import (
 	"errors"
@@ -7,9 +7,7 @@ import (
 	"unicode"
 )
 
-var (
-	errIsNumber = errors.New("element is number")
-)
+var errIsNumber = errors.New("element is number")
 
 type repeater struct {
 	nextElement bool
