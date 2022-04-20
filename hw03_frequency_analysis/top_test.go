@@ -43,6 +43,10 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+var text2 = `тест тест на малое малое количество слов`
+
+var text3 = `                                        `
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
@@ -78,5 +82,20 @@ func TestTop10(t *testing.T) {
 			}
 			require.Equal(t, expected, Top10(text))
 		}
+	})
+
+	t.Run("less 10 top words", func(t *testing.T) {
+		expected := []string{
+			"малое",      // 2
+			"тест",       // 2
+			"количество", // 1
+			"на",         // 1
+			"слов",       // 1
+		}
+		require.Equal(t, expected, Top10(text2))
+	})
+
+	t.Run("no words in few whitespace", func(t *testing.T) {
+		require.Len(t, Top10(text3), 0)
 	})
 }
