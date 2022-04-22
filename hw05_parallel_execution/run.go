@@ -24,6 +24,12 @@ func (c *errorCounter) Add() {
 	c.count++
 }
 
+func (c *errorCounter) Get() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.count
+}
+
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
 	if m <= 0 {
@@ -35,7 +41,7 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	ch := make(chan Task)
-	var wg = sync.WaitGroup{}
+	wg := sync.WaitGroup{}
 	wg.Add(n)
 	errCounter := errorCounter{}
 
@@ -51,15 +57,14 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	for _, t := range tasks {
-		if errCounter.count < m {
+		if errCounter.Get() < m {
 			ch <- t
 		}
-
 	}
 	close(ch)
 	wg.Wait()
 
-	if errCounter.count >= m {
+	if errCounter.Get() >= m {
 		return ErrErrorsLimitExceeded
 	}
 
