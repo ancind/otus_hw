@@ -7,42 +7,34 @@ import (
 	"unicode"
 )
 
-var errIsNumber = errors.New("element is number")
-
-type repeater struct {
-	nextElement bool
-	repeat      bool
-}
-
-func (r *repeater) next() {
-	r.nextElement = false
-	r.repeat = true
-}
-
-func Unpack(str string) (string, error) {
-	sliceString := []rune(str)
-	if len(sliceString) == 0 {
+func Unpack(stingForUnpack string) (string, error) {
+	runeSliceString := []rune(stingForUnpack)
+	if len(runeSliceString) == 0 {
 		return "", nil
 	}
 
-	if unicode.IsDigit(sliceString[0]) {
-		return "", errIsNumber
+	if unicode.IsDigit(runeSliceString[0]) {
+		return "", errors.New("element is number")
 	}
 
 	var stringBuilder strings.Builder
-	repeater := repeater{false, true}
 
-	for _, element := range sliceString {
+	canWriteNextElement := false
+	canRepeatPreviousElement := true
+
+	for _, element := range runeSliceString {
 		switch {
-		case repeater.nextElement:
+		case canWriteNextElement:
 			stringBuilder.WriteString(string(element))
-			repeater.next()
-		case string(element) == "\\":
-			repeater.nextElement = true
-			repeater.repeat = true
+
+			canWriteNextElement = false
+			canRepeatPreviousElement = true
+		case string(element) == "\\" && !canWriteNextElement:
+			canWriteNextElement = true
+			canRepeatPreviousElement = true
 		case unicode.IsDigit(element):
-			if !repeater.repeat {
-				return "", errIsNumber
+			if !canRepeatPreviousElement {
+				return "", errors.New("element is number")
 			}
 
 			repeatCount, _ := strconv.Atoi(string(element))
@@ -54,11 +46,11 @@ func Unpack(str string) (string, error) {
 				stringBuilder.WriteString(convertedString)
 			}
 
-			repeater.repeat = false
+			canRepeatPreviousElement = false
 		default:
 			stringBuilder.WriteString(string(element))
 
-			repeater.repeat = true
+			canRepeatPreviousElement = true
 		}
 	}
 
@@ -66,12 +58,12 @@ func Unpack(str string) (string, error) {
 }
 
 func repeatPreviousElement(str string, repeatCount int) string {
-	lastElement := lastElement(str)
+	lastWrittenElement := getLastElementString(str)
 
-	return strings.Repeat(lastElement, repeatCount-1)
+	return strings.Repeat(lastWrittenElement, repeatCount-1)
 }
 
-func lastElement(str string) string {
+func getLastElementString(str string) string {
 	if len(str) == 0 {
 		return ""
 	}
