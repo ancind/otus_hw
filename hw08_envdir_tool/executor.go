@@ -1,7 +1,32 @@
 package main
 
+import (
+	"fmt"
+	"os"
+	"os/exec"
+)
+
+const (
+	okCode   int = 0
+	failCode int = 1
+)
+
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
-	// Place your code here.
-	return
+	if len(cmd) == 0 {
+		return failCode
+	}
+
+	cmdResult := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
+	cmdResult.Stdout = os.Stdout
+	cmdResult.Stderr = os.Stderr
+	for key, envValue := range env {
+		cmdResult.Env = append(cmdResult.Env, fmt.Sprintf("%s=%s", key, envValue.Value))
+	}
+
+	if err := cmdResult.Run(); err != nil {
+		return failCode
+	}
+
+	return okCode
 }
