@@ -8,7 +8,7 @@ import (
 )
 
 func TestCopy(t *testing.T) {
-	var cases = []struct {
+	cases := []struct {
 		name, from, to string
 		limit, offset  int64
 		err            error
